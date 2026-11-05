@@ -1,15 +1,19 @@
 {
   "name": "budget-tracker",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Personal budget tracker web app",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node db/seed.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "engines": { "node": ">=18" },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
@@ -20,7 +24,7 @@
     "express-validator": "^7.3.2"
   },
   "devDependencies": {
-    "jest": "^25.5.4",
+    "jest": "^30.5.2",
     "nodemon": "^3.1.14",
     "supertest": "^7.3.1"
   }
