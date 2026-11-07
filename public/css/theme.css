@@ -1,0 +1,95 @@
+:root {
+  --page:#E8ECF4; --ink:#0F1115; --text:#1B1F3B; --muted:#4B5278;
+  --blue:#5B7CFA; --blue-light:#9CC3FF; --tag:#6C9BFF;
+  --glass:rgba(255,255,255,.38); --glass-border:rgba(255,255,255,.6);
+  --warn:#F0A93B; --danger:#E5584F;
+  --bs-body-color:var(--text); --bs-body-bg:var(--page);
+}
+
+body { background:var(--page);
+font-family:'Plus Jakarta Sans',system-ui,sans-serif; 
+}
+
+.app-shell { 
+    margin:24px; padding:24px; 
+    border-radius:32px; 
+    min-height:calc(100vh - 48px);
+    background:linear-gradient(135deg,#8C9FE0 0%,#B3BEE8 55%,#C5CCE6 100%); 
+}
+
+.glass { 
+    background:var(--glass); 
+    border:1px solid var(--glass-border); 
+    border-radius:24px; 
+    -webkit-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px); 
+}
+
+@supports not (backdrop-filter:blur(1px)) { 
+    .glass { background:rgba(255,255,255,.7); } 
+}
+
+.glass-blue { 
+    background:linear-gradient(180deg,#6E86F7,#A9D2FF); 
+    color:#fff; border-radius:24px; 
+}
+
+.btn-pill { 
+    background:var(--ink); 
+    color:#fff; 
+    border-radius:999px; 
+    padding:.5rem 1.25rem; 
+    border:0; 
+}
+
+.btn-pill:hover { 
+    background:#272b33; 
+    color:#fff; 
+}
+
+.btn-pill-soft { 
+    background:rgba(255,255,255,.45); 
+    border:1px solid var(--glass-border);
+    border-radius:999px; 
+    padding:.5rem 1.25rem; 
+    color:var(--text); 
+}
+
+.pill { 
+    border-radius:999px; 
+    padding:.15rem .7rem; 
+    font-size:.75rem; 
+}
+
+.pill-blue { 
+    background:var(--tag); 
+    color:#fff; 
+}
+
+.pill-soft { 
+    background:rgba(255,255,255,.55); 
+}
+
+.progress { 
+    background:rgba(255,255,255,.5); 
+    border-radius:999px; height:10px; 
+}
+
+.progress-bar { 
+    background:var(--blue); 
+}
+
+.progress-bar.warn { 
+    background:var(--warn); 
+}
+
+.progress-bar.over { 
+    background:var(--danger); 
+}
+
+/* forms and auth pages */
+.form-control { background:rgba(255,255,255,.6); border:1px solid var(--glass-border); border-radius:14px; padding:.65rem .9rem; }
+.form-control:focus { background:#fff; border-color:var(--blue); box-shadow:0 0 0 .2rem rgba(91,124,250,.25); }
+.form-label { color:var(--muted); font-size:.85rem; }
+.auth-card { width:100%; max-width:440px; }
+.text-muted-2 { color:var(--muted); }

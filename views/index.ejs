@@ -1,12 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Budget Tracker</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-  <div class="container py-5"><h1>Budget Tracker is running</h1></div>
-</body>
-</html>
+<%- include('partials/head', { title: 'Welcome' }) %>
+<main class="app-shell d-flex align-items-center justify-content-center">
+  <div class="glass p-4 p-md-5 auth-card text-center">
+    <h1 class="h2 fw-bold mb-2">Budget Tracker</h1>
+    <p class="text-muted-2 mb-4">See where your money goes each month and whether you are staying within budget.</p>
+    <%- include('partials/flash') %>
+    <% if (currentUser) { %>
+      <a href="/dashboard" class="btn btn-pill">Go to dashboard</a>
+    <% } else { %>
+      <a href="/login" class="btn btn-pill me-2">Log in</a>
+      <a href="/register" class="btn btn-pill-soft">Register</a>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>
