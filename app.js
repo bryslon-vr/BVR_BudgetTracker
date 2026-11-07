@@ -2,7 +2,7 @@ require('dotenv').config({ quiet: true });
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const { requireLogin } = require('./middleware/auth');
+const { requireRole } = require('./middleware/auth');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -44,7 +44,8 @@ app.use((req, res, next) => {
 // routes
 app.get('/', (req, res) => res.render('index'));
 app.use('/', require('./routes/auth'));
-app.get('/dashboard', requireLogin, (req, res) => res.render('dashboard'));
+app.get('/dashboard', requireRole('user'), (req, res) => res.render('dashboard'));
+app.get('/admin', requireRole('admin'), (req, res) => res.render('admin/stats'));
 
 // errors
 app.use((req, res) => res.status(404).render('errors/404'));

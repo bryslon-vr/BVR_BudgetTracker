@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const DEFAULT_CATEGORIES = require('../db/defaults');
-const { redirectIfLoggedIn } = require('../middleware/auth');
+const { redirectIfLoggedIn, homePathFor } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -68,7 +68,7 @@ router.post('/register', redirectIfLoggedIn, registerRules, (req, res) => {
     if (err) throw err;
     req.session.user = { id: Number(userId), name, email, role: 'user' };
     req.session.flash = { type: 'success', message: `Welcome, ${name}! Your account has been created.` };
-    req.session.save(() => res.redirect('/dashboard'));
+    req.session.save(() => res.redirect(homePathFor(req.session.user)));
   });
 });
 
@@ -100,7 +100,7 @@ router.post('/login', redirectIfLoggedIn, loginRules, (req, res) => {
   req.session.regenerate((err) => {
     if (err) throw err;
     req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
-    req.session.save(() => res.redirect('/dashboard'));
+    req.session.save(() => res.redirect(homePathFor(req.session.user)));
   });
 });
 
