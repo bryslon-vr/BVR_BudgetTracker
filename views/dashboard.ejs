@@ -1,13 +1,6 @@
-<%- include('partials/head', { title: 'Dashboard' }) %>
-<main class="app-shell">
-  <div class="glass p-4 p-md-5">
-    <%- include('partials/flash') %>
-    <h1 class="h3 fw-bold">Welcome, <%= currentUser.name %></h1>
-    <p class="text-muted-2">You are logged in as <span class="pill pill-blue"><%= currentUser.role %></span></p>
-    <p>The real dashboard comes in Week 3.</p>
-    <form method="POST" action="/logout">
-      <button type="submit" class="btn btn-pill">Log out</button>
-    </form>
-  </div>
-</main>
-<%- include('partials/foot') %>
+<%- include('partials/app-start', { title: 'Dashboard', active: 'dashboard' }) %>
+<div class="glass p-4 p-md-5">
+  <h2 class="h4 fw-bold">Welcome, <%= currentUser.name %></h2>
+  <p class="mb-0">The real dashboard comes in Week 3.</p>
+</div>
+<%- include('partials/app-end') %>

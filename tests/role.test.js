@@ -76,3 +76,19 @@ describe('redirect after login', () => {
     expect(res.headers.location).toBe('/admin');
   });
 });
+
+describe('navigation', () => {
+  test('a normal user sees the user menu and not the admin menu', async () => {
+    const agent = await loginAs(user);
+    const res = await agent.get('/dashboard');
+    expect(res.text).toContain('Categories');
+    expect(res.text).not.toContain('Statistics');
+  });
+
+  test('an admin sees the admin menu and not the user menu', async () => {
+    const agent = await loginAs(admin);
+    const res = await agent.get('/admin');
+    expect(res.text).toContain('Statistics');
+    expect(res.text).not.toContain('Categories');
+  });
+});

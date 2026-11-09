@@ -1,13 +1,6 @@
-<%- include('../partials/head', { title: 'Admin' }) %>
-<main class="app-shell">
-  <div class="glass p-4 p-md-5">
-    <%- include('../partials/flash') %>
-    <h1 class="h3 fw-bold">Admin: usage statistics</h1>
-    <p class="text-muted-2">Logged in as <%= currentUser.name %> <span class="pill pill-blue"><%= currentUser.role %></span></p>
-    <p>The statistics page is built in Week 3. Admins only see totals and counts, never individual transactions.</p>
-    <form method="POST" action="/logout">
-      <button type="submit" class="btn btn-pill">Log out</button>
-    </form>
-  </div>
-</main>
-<%- include('../partials/foot') %>
+<%- include('../partials/app-start', { title: 'Statistics', active: 'admin' }) %>
+<div class="glass p-4 p-md-5">
+  <h2 class="h4 fw-bold">Admin overview</h2>
+  <p class="mb-0">The usage statistics page is built in Week 3. Admins only see totals and counts, never individual transactions.</p>
+</div>
+<%- include('../partials/app-end') %>
