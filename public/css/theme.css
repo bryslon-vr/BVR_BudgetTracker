@@ -238,12 +238,62 @@ font-family:'Plus Jakarta Sans',system-ui,sans-serif;
   .sidebar-brand { 
     display:none; 
 }
-  .sidebar-nav { 
+  .sidebar-nav {
     flex-direction:row; 
     margin:0; 
     gap:.25rem; 
+    flex:1; 
+    justify-content:space-around; 
 }
   .sidebar-bottom { 
     margin:0; 
 }
+}
+
+/* lists, icon buttons and modals */
+.list-row { 
+    display:flex; 
+    align-items:center; 
+    gap:.75rem; 
+    padding:.7rem .25rem; 
+    border-bottom:1px solid rgba(255,255,255,.6); 
+}
+
+.list-row:last-child { 
+    border-bottom:0; 
+}
+
+.icon-btn { 
+    width:36px; 
+    height:36px; 
+    border-radius:12px; 
+    display:grid; 
+    place-items:center; 
+    color:var(--text);
+    background:rgba(255,255,255,.55); 
+    border:0; 
+    padding:0; 
+    text-decoration:none; 
+    flex:none; 
+}
+
+.icon-btn:hover { 
+    background:#fff;
+    color:var(--blue); 
+}
+
+.icon-btn.disabled { 
+    opacity:.4; 
+    cursor:not-allowed; 
+}
+
+.icon-btn.disabled:hover { 
+    background:rgba(255,255,255,.55); 
+    color:var(--text); 
+}
+
+.modal-content { 
+    border-radius:24px; 
+    border:1px solid var(--glass-border); 
+    background:#eef1fb; 
 }

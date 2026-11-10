@@ -45,6 +45,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.render('index'));
 app.use('/', require('./routes/auth'));
 app.get('/dashboard', requireRole('user'), (req, res) => res.render('dashboard'));
+app.use('/categories', require('./routes/categories'));
 app.get('/admin', requireRole('admin'), (req, res) => res.render('admin/stats'));
 
 // errors
