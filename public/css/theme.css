@@ -356,3 +356,5 @@ font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     height:100vh; height:100dvh; padding:12px 12px 88px; 
 }
 }
+
+.min-w-0 { min-width:0; }

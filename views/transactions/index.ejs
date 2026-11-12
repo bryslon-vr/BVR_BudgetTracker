@@ -10,15 +10,50 @@
   <% } %>
   <ul class="list-unstyled mb-0">
     <% transactions.forEach((t) => { %>
+      <% const label = (t.note || t.category) + ' (' + money(t.amount) + ')'; %>
       <li class="list-row">
-        <div class="flex-grow-1">
-          <div class="fw-medium"><%= t.note || t.category %></div>
-          <div class="small text-muted-2"><%= fmtDate(t.date) %></div>
+        <div class="flex-grow-1 min-w-0">
+          <div class="fw-medium text-truncate"><%= t.note || t.category %></div>
+          <div class="small text-muted-2 d-flex flex-wrap gap-2 align-items-center">
+            <span><%= fmtDate(t.date) %></span>
+            <span class="pill pill-soft"><%= t.category %></span>
+          </div>
         </div>
-        <span class="pill pill-soft"><%= t.category %></span>
         <strong class="amount <%= t.type === 'income' ? 'amount-in' : '' %>"><%= t.type === 'income' ? '+' : '-' %><%= money(t.amount) %></strong>
+        <a class="icon-btn" href="/transactions/<%= t.id %>/edit" title="Edit">
+          <i class="bi bi-pencil"></i><span class="visually-hidden">Edit <%= label %></span>
+        </a>
+        <button type="button" class="icon-btn" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                data-label="<%= label %>" data-action="/transactions/<%= t.id %>/delete" title="Delete">
+          <i class="bi bi-trash"></i><span class="visually-hidden">Delete <%= label %></span>
+        </button>
       </li>
     <% }) %>
-    </ul>
+  </ul>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4">
+        <h2 class="h5 fw-bold" id="deleteModalLabel">Delete transaction?</h2>
+        <p class="mb-4">Delete <strong id="deleteLabel"></strong>? This cannot be undone.</p>
+        <form method="POST" id="deleteForm" class="d-flex gap-2">
+          <button type="submit" class="btn btn-pill">Delete</button>
+          <button type="button" class="btn btn-pill-soft" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
   </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('deleteModal');
+    modal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      document.getElementById('deleteLabel').textContent = button.getAttribute('data-label');
+      document.getElementById('deleteForm').setAttribute('action', button.getAttribute('data-action'));
+    });
+  });
+</script>
 <%- include('../partials/app-end') %>

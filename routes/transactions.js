@@ -6,7 +6,7 @@ const { requireRole } = require('../middleware/auth');
 const router = express.Router();
 router.use(requireRole('user')); // only normal users have transactions
 
-// Validation for adding (and later editing) a transaction
+// Validation for adding and editing a transaction
 const transactionRules = [
   body('type').isIn(['income', 'expense']).withMessage('Please choose income or expense.'),
   body('amount')
@@ -34,17 +34,26 @@ const transactionRules = [
 const userCategories = (userId) =>
   db.prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY name').all(userId);
 
-function renderForm(res, req, status, errors, values) {
+// Finds a transaction only if it belongs to the logged-in user
+function findOwn(req) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return null;
+  return db.prepare('SELECT * FROM transactions WHERE id = ? AND user_id = ?').get(id, req.session.user.id) || null;
+}
+
+const notFound = (res) => res.status(404).render('errors/404');
+
+function renderForm(res, req, status, errors, values, edit = null) {
   return res.status(status).render('transactions/form', {
-    heading: 'Add transaction',
-    formAction: '/transactions',
+    heading: edit ? 'Edit transaction' : 'Add transaction',
+    formAction: edit ? `/transactions/${edit.id}` : '/transactions',
     categories: userCategories(req.session.user.id),
     errors,
     values,
   });
 }
 
-// ---------- list (filters and paging come later) ----------
+// list (filters and paging come later) 
 router.get('/', (req, res) => {
   const transactions = db
     .prepare(
@@ -75,6 +84,48 @@ router.post('/', transactionRules, (req, res) => {
   ).run(req.session.user.id, Number(category_id), type, Number(amount), date, note || null);
 
   req.session.flash = { type: 'success', message: 'Transaction added.' };
+  res.redirect('/transactions');
+});
+
+// edit
+router.get('/:id/edit', (req, res) => {
+  const t = findOwn(req);
+  if (!t) return notFound(res);
+  const values = {
+    type: t.type,
+    amount: t.amount.toFixed(2),
+    date: t.date,
+    category_id: String(t.category_id),
+    note: t.note || '',
+  };
+  renderForm(res, req, 200, {}, values, t);
+});
+
+router.post('/:id', transactionRules, (req, res) => {
+  const t = findOwn(req);
+  if (!t) return notFound(res);
+
+  const result = validationResult(req);
+  const { type, amount, date, category_id, note } = req.body;
+  if (!result.isEmpty()) {
+    return renderForm(res, req, 422, result.mapped(), { type, amount, date, category_id, note }, t);
+  }
+
+  db.prepare(
+    'UPDATE transactions SET category_id = ?, type = ?, amount = ?, date = ?, note = ? WHERE id = ? AND user_id = ?'
+  ).run(Number(category_id), type, Number(amount), date, note || null, t.id, req.session.user.id);
+
+  req.session.flash = { type: 'success', message: 'Transaction updated.' };
+  res.redirect('/transactions');
+});
+
+// delete 
+router.post('/:id/delete', (req, res) => {
+  const t = findOwn(req);
+  if (!t) return notFound(res);
+
+  db.prepare('DELETE FROM transactions WHERE id = ? AND user_id = ?').run(t.id, req.session.user.id);
+  req.session.flash = { type: 'success', message: 'Transaction deleted.' };
   res.redirect('/transactions');
 });
 
