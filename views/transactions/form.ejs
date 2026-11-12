@@ -1,12 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Budget Tracker</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-  <div class="container py-5"><h1>Budget Tracker is running</h1></div>
-</body>
-</html>
+<%- include('../partials/app-start', { title: heading, active: 'transactions' }) %>
+<div class="row">
+  <div class="col-12 col-md-10 col-lg-6">
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3"><%= heading %></h2>
+
+      <% if (categories.length === 0) { %>
+        <p class="mb-3">You need a category before you can add a transaction.</p>
+        <a href="/categories" class="btn btn-pill">Add a category</a>
+      <% } else { %>
+        <form method="POST" action="<%= formAction %>" novalidate>
+          <div class="mb-3">
+            <div class="d-flex gap-2" role="radiogroup" aria-label="Type">
+              <input type="radio" class="btn-check" name="type" id="type-expense" value="expense" <%= values.type !== 'income' ? 'checked' : '' %>>
+              <label class="btn btn-pill-soft" for="type-expense">Expense</label>
+              <input type="radio" class="btn-check" name="type" id="type-income" value="income" <%= values.type === 'income' ? 'checked' : '' %>>
+              <label class="btn btn-pill-soft" for="type-income">Income</label>
+            </div>
+            <% if (errors.type) { %><div class="text-danger small mt-1"><%= errors.type.msg %></div><% } %>
+          </div>
+
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount (R)</label>
+            <input type="text" inputmode="decimal" id="amount" name="amount" placeholder="0.00" class="form-control <%= errors.amount ? 'is-invalid' : '' %>" value="<%= values.amount || '' %>">
+            <% if (errors.amount) { %><div class="invalid-feedback"><%= errors.amount.msg %></div><% } %>
+          </div>
+
+          <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" id="date" name="date" class="form-control <%= errors.date ? 'is-invalid' : '' %>" value="<%= values.date || '' %>">
+            <% if (errors.date) { %><div class="invalid-feedback"><%= errors.date.msg %></div><% } %>
+          </div>
+
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Category</label>
+            <select id="category_id" name="category_id" class="form-select form-control <%= errors.category_id ? 'is-invalid' : '' %>">
+              <option value="">Choose a category</option>
+              <% categories.forEach((c) => { %>
+                <option value="<%= c.id %>" <%= String(values.category_id) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+            <% if (errors.category_id) { %><div class="invalid-feedback"><%= errors.category_id.msg %></div><% } %>
+          </div>
+
+          <div class="mb-4">
+            <label for="note" class="form-label">Note (optional)</label>
+            <input type="text" id="note" name="note" maxlength="250" class="form-control <%= errors.note ? 'is-invalid' : '' %>" value="<%= values.note || '' %>">
+            <% if (errors.note) { %><div class="invalid-feedback"><%= errors.note.msg %></div><% } %>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-pill">Save</button>
+            <a href="/transactions" class="btn btn-pill-soft">Cancel</a>
+          </div>
+        </form>
+        <script>
+          // Default the date to today on the person's own device
+          (function () {
+            var d = document.getElementById('date');
+            if (d && !d.value) {
+              var n = new Date();
+              d.value = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+            }
+          })();
+        </script>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/app-end') %>

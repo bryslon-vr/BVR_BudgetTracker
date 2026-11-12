@@ -2,10 +2,19 @@ require('dotenv').config({ quiet: true });
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const db = require('./db');
 const { requireRole } = require('./middleware/auth');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Helpers available in every view
+app.locals.money = (n) =>
+  'R ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+app.locals.fmtDate = (s) => {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -44,8 +53,15 @@ app.use((req, res, next) => {
 // routes
 app.get('/', (req, res) => res.render('index'));
 app.use('/', require('./routes/auth'));
-app.get('/dashboard', requireRole('user'), (req, res) => res.render('dashboard'));
+app.get('/dashboard', requireRole('user'), (req, res) => {
+  const categories = db
+    .prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY name')
+    .all(req.session.user.id);
+  res.render('dashboard', { categories });
+});
+
 app.use('/categories', require('./routes/categories'));
+app.use('/transactions', require('./routes/transactions'));
 app.get('/admin', requireRole('admin'), (req, res) => res.render('admin/stats'));
 
 // errors

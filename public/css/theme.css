@@ -297,3 +297,62 @@ font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     border:1px solid var(--glass-border); 
     background:#eef1fb; 
 }
+
+/* transaction type toggle and amounts */
+.btn-check:checked + .btn-pill-soft { 
+    background:var(--ink); 
+    color:#fff; 
+    border-color:var(--ink); 
+}
+
+.btn-check:focus-visible + .btn { 
+    outline:2px solid var(--blue); 
+    outline-offset:2px; 
+}
+
+.amount { 
+    white-space:nowrap; 
+}
+
+.amount-in { 
+    color:#2E47B8; 
+}
+
+/* fixed layout: sidebar and top bar stay put, only the content area scrolls */
+.app-shell-fixed { 
+    height:calc(100vh - 48px); 
+    min-height:0; 
+    overflow:hidden; 
+}
+
+.app-shell-fixed .app-layout { 
+    height:100%; 
+    min-height:0; 
+}
+
+.app-shell-fixed .app-main { 
+    display:flex; 
+    flex-direction:column; 
+    height:100%; 
+    min-height:0; 
+}
+
+.app-shell-fixed .topbar { 
+    flex:none; 
+}
+
+.app-shell-fixed main { 
+    flex:1; 
+    min-height:0; 
+    overflow-y:auto; 
+    overscroll-behavior:contain;
+    padding:2px .5rem 2px 2px; 
+    scrollbar-width:thin; 
+    scrollbar-color:rgba(60,80,160,.45) transparent; 
+}
+
+@media (max-width: 767.98px) {
+  .app-shell-fixed { 
+    height:100vh; height:100dvh; padding:12px 12px 88px; 
+}
+}

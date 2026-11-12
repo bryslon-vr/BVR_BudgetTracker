@@ -1,6 +1,48 @@
 <%- include('partials/app-start', { title: 'Dashboard', active: 'dashboard' }) %>
-<div class="glass p-4 p-md-5">
-  <h2 class="h4 fw-bold">Welcome, <%= currentUser.name %></h2>
-  <p class="mb-0">The real dashboard comes in Week 3.</p>
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="glass p-4 p-md-5 h-100">
+      <h2 class="h4 fw-bold">Welcome, <%= currentUser.name %></h2>
+      <p class="mb-0">The real dashboard comes in Week 3.</p>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3">Quick add</h2>
+      <% if (categories.length === 0) { %>
+        <p class="mb-3">Add a category first.</p>
+        <a href="/categories" class="btn btn-pill">Add a category</a>
+      <% } else { %>
+        <form method="POST" action="/transactions" novalidate>
+          <div class="d-flex gap-2 mb-3" role="radiogroup" aria-label="Type">
+            <input type="radio" class="btn-check" name="type" id="q-expense" value="expense" checked>
+            <label class="btn btn-pill-soft" for="q-expense">Expense</label>
+            <input type="radio" class="btn-check" name="type" id="q-income" value="income">
+            <label class="btn btn-pill-soft" for="q-income">Income</label>
+          </div>
+          <div class="mb-3">
+            <label for="q-amount" class="form-label">Amount (R)</label>
+            <input type="text" inputmode="decimal" id="q-amount" name="amount" placeholder="0.00" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="q-category" class="form-label">Category</label>
+            <select id="q-category" name="category_id" class="form-select form-control">
+              <% categories.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
+            </select>
+          </div>
+          <input type="hidden" id="q-date" name="date" value="">
+          <button type="submit" class="btn btn-pill">Add</button>
+        </form>
+        <script>
+          (function () {
+            var n = new Date();
+            document.getElementById('q-date').value =
+              n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+          })();
+        </script>
+      <% } %>
+    </div>
+  </div>
 </div>
 <%- include('partials/app-end') %>
