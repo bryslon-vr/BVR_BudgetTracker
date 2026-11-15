@@ -2,6 +2,9 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const { requireRole } = require('../middleware/auth');
+const { parseFilters, buildWhere } = require('../utils/transactionFilters');
+
+const PAGE_SIZE = 20;
 
 const router = express.Router();
 router.use(requireRole('user')); // only normal users have transactions
@@ -53,19 +56,54 @@ function renderForm(res, req, status, errors, values, edit = null) {
   });
 }
 
-// list (filters and paging come later) 
+// list with filters, search and paging 
 router.get('/', (req, res) => {
+  const userId = req.session.user.id;
+  const categories = userCategories(userId);
+  const { filters, values, errors, page } = parseFilters(req.query, categories.map((c) => c.id));
+  const { where, params } = buildWhere(filters, userId);
+  const base = `FROM transactions t JOIN categories c ON c.id = t.category_id WHERE ${where}`;
+
+  const totals = db
+    .prepare(
+      `SELECT COUNT(*) AS n,
+              COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount END), 0) AS income,
+              COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount END), 0) AS expense
+         ${base}`
+    )
+    .get(...params);
+
+  const pages = Math.max(1, Math.ceil(totals.n / PAGE_SIZE));
+  const current = Math.min(page, pages);
   const transactions = db
     .prepare(
       `SELECT t.id, t.type, t.amount, t.date, t.note, c.name AS category
-         FROM transactions t
-         JOIN categories c ON c.id = t.category_id
-        WHERE t.user_id = ?
+         ${base}
         ORDER BY t.date DESC, t.id DESC
-        LIMIT 50`
+        LIMIT ? OFFSET ?`
     )
-    .all(req.session.user.id);
-  res.render('transactions/index', { transactions });
+    .all(...params, PAGE_SIZE, (current - 1) * PAGE_SIZE);
+
+  // The filters that were actually applied, so the paging links keep them
+  const applied = {};
+  ['from', 'to', 'category', 'type', 'min', 'max', 'q'].forEach((k) => {
+    if (filters[k] !== undefined) applied[k] = String(filters[k]);
+  });
+  const pageUrl = (p) => '/transactions?' + new URLSearchParams({ ...applied, page: String(p) }).toString();
+
+  res.render('transactions/index', {
+    transactions,
+    categories,
+    values,
+    errors,
+    totals,
+    filtersApplied: Object.keys(applied).length > 0,
+    page: current,
+    pages,
+    pageSize: PAGE_SIZE,
+    prevUrl: current > 1 ? pageUrl(current - 1) : null,
+    nextUrl: current < pages ? pageUrl(current + 1) : null,
+  });
 });
 
 // add 

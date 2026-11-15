@@ -1,12 +1,88 @@
 <%- include('../partials/app-start', { title: 'Transactions', active: 'transactions' }) %>
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <span class="text-muted-2">Your latest 50 transactions</span>
-  <a href="/transactions/new" class="btn btn-pill">Add transaction</a>
+<%
+  const showFilters = filtersApplied || Object.keys(errors).length > 0;
+  const total = totals.n;
+  const first = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const last = Math.min(page * pageSize, total);
+%>
+<div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+  <span class="text-muted-2"><%= total %> <%= filtersApplied ? 'matching ' : '' %><%= total === 1 ? 'transaction' : 'transactions' %></span>
+  <div class="d-flex gap-2">
+    <button class="btn btn-pill-soft d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#filters"
+            aria-expanded="<%= showFilters ? 'true' : 'false' %>" aria-controls="filters">
+      <i class="bi bi-funnel"></i> Filters
+    </button>
+    <a href="/transactions/new" class="btn btn-pill">Add transaction</a>
+  </div>
 </div>
+
+<form method="GET" action="/transactions" id="filters" class="glass p-4 mb-3 collapse d-md-block <%= showFilters ? 'show' : '' %>" novalidate>
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <label for="from" class="form-label">From</label>
+      <input type="date" id="from" name="from" class="form-control <%= errors.from ? 'is-invalid' : '' %>" value="<%= values.from %>">
+      <% if (errors.from) { %><div class="invalid-feedback"><%= errors.from %></div><% } %>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="to" class="form-label">To</label>
+      <input type="date" id="to" name="to" class="form-control <%= errors.to ? 'is-invalid' : '' %>" value="<%= values.to %>">
+      <% if (errors.to) { %><div class="invalid-feedback"><%= errors.to %></div><% } %>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="category" class="form-label">Category</label>
+      <select id="category" name="category" class="form-select form-control <%= errors.category ? 'is-invalid' : '' %>">
+        <option value="">All categories</option>
+        <% categories.forEach((c) => { %>
+          <option value="<%= c.id %>" <%= String(values.category) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+      <% if (errors.category) { %><div class="invalid-feedback"><%= errors.category %></div><% } %>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="type" class="form-label">Type</label>
+      <select id="type" name="type" class="form-select form-control <%= errors.type ? 'is-invalid' : '' %>">
+        <option value="">Income and expenses</option>
+        <option value="expense" <%= values.type === 'expense' ? 'selected' : '' %>>Expenses only</option>
+        <option value="income" <%= values.type === 'income' ? 'selected' : '' %>>Income only</option>
+      </select>
+      <% if (errors.type) { %><div class="invalid-feedback"><%= errors.type %></div><% } %>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="min" class="form-label">Min amount (R)</label>
+      <input type="text" inputmode="decimal" id="min" name="min" class="form-control <%= errors.min ? 'is-invalid' : '' %>" value="<%= values.min %>">
+      <% if (errors.min) { %><div class="invalid-feedback"><%= errors.min %></div><% } %>
+    </div>
+    <div class="col-6 col-md-3">
+      <label for="max" class="form-label">Max amount (R)</label>
+      <input type="text" inputmode="decimal" id="max" name="max" class="form-control <%= errors.max ? 'is-invalid' : '' %>" value="<%= values.max %>">
+      <% if (errors.max) { %><div class="invalid-feedback"><%= errors.max %></div><% } %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label for="q" class="form-label">Search notes</label>
+      <input type="text" id="q" name="q" maxlength="120" class="form-control <%= errors.q ? 'is-invalid' : '' %>" value="<%= values.q %>">
+      <% if (errors.q) { %><div class="invalid-feedback"><%= errors.q %></div><% } %>
+    </div>
+  </div>
+  <div class="d-flex gap-2 mt-3">
+    <button type="submit" class="btn btn-pill">Filter</button>
+    <a href="/transactions" class="btn btn-pill-soft">Reset</a>
+  </div>
+</form>
+
+<% if (filtersApplied) { %>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <span class="pill pill-soft">Income +<%= money(totals.income) %></span>
+    <span class="pill pill-soft">Expenses -<%= money(totals.expense) %></span>
+  </div>
+<% } %>
 
 <div class="glass p-4">
   <% if (transactions.length === 0) { %>
-    <p class="mb-0 text-muted-2">No transactions yet. Add your first one.</p>
+    <% if (filtersApplied) { %>
+      <p class="mb-0 text-muted-2">No transactions match your filters. <a href="/transactions">Reset the filters</a></p>
+    <% } else { %>
+      <p class="mb-0 text-muted-2">No transactions yet. Add your first one.</p>
+    <% } %>
   <% } %>
   <ul class="list-unstyled mb-0">
     <% transactions.forEach((t) => { %>
@@ -30,6 +106,16 @@
       </li>
     <% }) %>
   </ul>
+
+  <% if (pages > 1) { %>
+    <nav class="d-flex justify-content-between align-items-center gap-2 mt-3" aria-label="Pages">
+      <span class="text-muted-2 small">Showing <%= first %>–<%= last %> of <%= total %></span>
+      <div class="d-flex gap-2">
+        <% if (prevUrl) { %><a class="btn btn-pill-soft" href="<%= prevUrl %>">Previous</a><% } %>
+        <% if (nextUrl) { %><a class="btn btn-pill" href="<%= nextUrl %>">Next</a><% } %>
+      </div>
+    </nav>
+  <% } %>
 </div>
 
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
