@@ -117,29 +117,5 @@
     </nav>
   <% } %>
 </div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body p-4">
-        <h2 class="h5 fw-bold" id="deleteModalLabel">Delete transaction?</h2>
-        <p class="mb-4">Delete <strong id="deleteLabel"></strong>? This cannot be undone.</p>
-        <form method="POST" id="deleteForm" class="d-flex gap-2">
-          <button type="submit" class="btn btn-pill">Delete</button>
-          <button type="button" class="btn btn-pill-soft" data-bs-dismiss="modal">Cancel</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var modal = document.getElementById('deleteModal');
-    modal.addEventListener('show.bs.modal', function (event) {
-      var button = event.relatedTarget;
-      document.getElementById('deleteLabel').textContent = button.getAttribute('data-label');
-      document.getElementById('deleteForm').setAttribute('action', button.getAttribute('data-action'));
-    });
-  });
-</script>
+<%- include('../partials/delete-modal', { modalTitle: 'Delete transaction?', modalNote: 'This cannot be undone.' }) %>
 <%- include('../partials/app-end') %>

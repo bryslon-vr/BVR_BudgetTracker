@@ -20,7 +20,15 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 if (isProduction) app.set('trust proxy', 1); // needed behind Render/Railway for secure cookies
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+
+// Every form field must be plain text. A repeated field (date=a&date=b) or a nested one (note[a]=1)
+// is not something our forms send, so it is refused instead of crashing the page.
+app.use((req, res, next) => {
+  const tooComplex = Object.values(req.body || {}).some((value) => typeof value !== 'string');
+  if (tooComplex) return res.status(400).render('errors/400');
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // sessions

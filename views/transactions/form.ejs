@@ -27,7 +27,7 @@
 
           <div class="mb-3">
             <label for="date" class="form-label">Date</label>
-            <input type="date" id="date" name="date" class="form-control <%= errors.date ? 'is-invalid' : '' %>" value="<%= values.date || '' %>">
+            <input type="date" id="date" name="date" data-default-today class="form-control <%= errors.date ? 'is-invalid' : '' %>" value="<%= values.date || '' %>">
             <% if (errors.date) { %><div class="invalid-feedback"><%= errors.date.msg %></div><% } %>
           </div>
 
@@ -53,16 +53,6 @@
             <a href="/transactions" class="btn btn-pill-soft">Cancel</a>
           </div>
         </form>
-        <script>
-          // Default the date to today on the person's own device
-          (function () {
-            var d = document.getElementById('date');
-            if (d && !d.value) {
-              var n = new Date();
-              d.value = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
-            }
-          })();
-        </script>
       <% } %>
     </div>
   </div>

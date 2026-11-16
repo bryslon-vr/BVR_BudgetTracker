@@ -20,7 +20,7 @@
               </span>
             <% } else { %>
               <button type="button" class="icon-btn" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                      data-name="<%= c.name %>" data-action="/categories/<%= c.id %>/delete" title="Delete <%= c.name %>">
+                      data-label="<%= c.name %>" data-action="/categories/<%= c.id %>/delete" title="Delete <%= c.name %>">
                 <i class="bi bi-trash"></i><span class="visually-hidden">Delete <%= c.name %></span>
               </button>
             <% } %>
@@ -45,29 +45,5 @@
     </div>
   </div>
 </div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body p-4">
-        <h2 class="h5 fw-bold" id="deleteModalLabel">Delete category?</h2>
-        <p class="mb-4">Delete <strong id="deleteName"></strong>? Any budget set for it will be removed too.</p>
-        <form method="POST" id="deleteForm" class="d-flex gap-2">
-          <button type="submit" class="btn btn-pill">Delete</button>
-          <button type="button" class="btn btn-pill-soft" data-bs-dismiss="modal">Cancel</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var modal = document.getElementById('deleteModal');
-    modal.addEventListener('show.bs.modal', function (event) {
-      var button = event.relatedTarget;
-      document.getElementById('deleteName').textContent = button.getAttribute('data-name');
-      document.getElementById('deleteForm').setAttribute('action', button.getAttribute('data-action'));
-    });
-  });
-</script>
+<%- include('../partials/delete-modal', { modalTitle: 'Delete category?', modalNote: 'Any budget set for it will be removed too.' }) %>
 <%- include('../partials/app-end') %>

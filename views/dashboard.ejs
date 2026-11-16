@@ -31,16 +31,9 @@
               <% categories.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
             </select>
           </div>
-          <input type="hidden" id="q-date" name="date" value="">
+          <input type="hidden" id="q-date" name="date" value="" data-default-today>
           <button type="submit" class="btn btn-pill">Add</button>
         </form>
-        <script>
-          (function () {
-            var n = new Date();
-            document.getElementById('q-date').value =
-              n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
-          })();
-        </script>
       <% } %>
     </div>
   </div>
