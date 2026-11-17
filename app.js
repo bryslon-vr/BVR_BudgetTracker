@@ -70,6 +70,7 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
 
 app.use('/categories', require('./routes/categories'));
 app.use('/transactions', require('./routes/transactions'));
+app.use('/budgets', require('./routes/budgets'));
 app.get('/admin', requireRole('admin'), (req, res) => res.render('admin/stats'));
 
 // errors
