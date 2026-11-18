@@ -3,6 +3,9 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const db = require('./db');
+const { currentMonth, monthLabel } = require('./utils/months');
+const { loadMonth } = require('./utils/budgetData');
+const { budgetAlerts } = require('./utils/budgetStatus');
 const { requireRole } = require('./middleware/auth');
 
 const app = express();
@@ -62,10 +65,16 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.render('index'));
 app.use('/', require('./routes/auth'));
 app.get('/dashboard', requireRole('user'), (req, res) => {
-  const categories = db
-    .prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY name')
-    .all(req.session.user.id);
-  res.render('dashboard', { categories });
+  const userId = req.session.user.id;
+  const categories = db.prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY name').all(userId);
+  const month = currentMonth();
+  const { budgeted } = loadMonth(userId, month);
+  res.render('dashboard', {
+    categories,
+    monthLabel: monthLabel(month),
+    budgetCount: budgeted.length,
+    alerts: budgetAlerts(budgeted),
+  });
 });
 
 app.use('/categories', require('./routes/categories'));

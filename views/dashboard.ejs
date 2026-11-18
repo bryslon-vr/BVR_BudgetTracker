@@ -1,9 +1,29 @@
 <%- include('partials/app-start', { title: 'Dashboard', active: 'dashboard' }) %>
 <div class="row g-3">
   <div class="col-12 col-lg-7">
-    <div class="glass p-4 p-md-5 h-100">
+    <div class="glass p-4 mb-3">
       <h2 class="h4 fw-bold">Welcome, <%= currentUser.name %></h2>
-      <p class="mb-0">The real dashboard comes in Week 3.</p>
+      <p class="mb-0">The full dashboard with charts comes next.</p>
+    </div>
+
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3">Budget alerts for <%= monthLabel %></h2>
+      <% if (budgetCount === 0) { %>
+        <p class="mb-0 text-muted-2">You have not set any budgets for this month. <a href="/budgets">Set a budget</a></p>
+      <% } else if (alerts.length === 0) { %>
+        <p class="mb-0">All your budgets are on track this month.</p>
+      <% } else { %>
+        <% alerts.forEach((a) => { %>
+          <div class="alert alert-<%= a.status === 'exceeded' ? 'danger' : 'warning' %> rounded-4 mb-2" role="alert">
+            <% if (a.status === 'exceeded') { %>
+              <strong><%= a.name %></strong> is over budget (<%= a.percent %>% used, over by <%= money(Math.abs(a.remaining)) %>).
+            <% } else { %>
+              <strong><%= a.name %></strong> has used <%= a.percent %>% of its budget (<%= money(a.remaining) %> left).
+            <% } %>
+          </div>
+        <% }) %>
+        <a href="/budgets" class="btn btn-pill-soft mt-2">View budgets</a>
+      <% } %>
     </div>
   </div>
 

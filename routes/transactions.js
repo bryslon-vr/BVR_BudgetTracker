@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const { requireRole } = require('../middleware/auth');
 const { parseFilters, buildWhere } = require('../utils/transactionFilters');
+const { budgetNotice } = require('../utils/budgetData');
 
 const PAGE_SIZE = 20;
 
@@ -42,6 +43,12 @@ function findOwn(req) {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) return null;
   return db.prepare('SELECT * FROM transactions WHERE id = ? AND user_id = ?').get(id, req.session.user.id) || null;
+}
+
+// The success message, plus a budget warning when an expense brings a category to 80% or more
+function withBudgetNotice(message, userId, type, categoryId, date) {
+  const notice = type === 'expense' ? budgetNotice(userId, categoryId, date.slice(0, 7)) : null;
+  return notice ? [{ type: 'success', message }, notice] : { type: 'success', message };
 }
 
 const notFound = (res) => res.status(404).render('errors/404');
@@ -121,8 +128,8 @@ router.post('/', transactionRules, (req, res) => {
     'INSERT INTO transactions (user_id, category_id, type, amount, date, note) VALUES (?, ?, ?, ?, ?, ?)'
   ).run(req.session.user.id, Number(category_id), type, Number(amount), date, note || null);
 
-  req.session.flash = { type: 'success', message: 'Transaction added.' };
-  res.redirect('/transactions');
+    req.session.flash = withBudgetNotice('Transaction added.', req.session.user.id, type, Number(category_id), date);
+    res.redirect('/transactions');
 });
 
 // edit
@@ -153,8 +160,8 @@ router.post('/:id', transactionRules, (req, res) => {
     'UPDATE transactions SET category_id = ?, type = ?, amount = ?, date = ?, note = ? WHERE id = ? AND user_id = ?'
   ).run(Number(category_id), type, Number(amount), date, note || null, t.id, req.session.user.id);
 
-  req.session.flash = { type: 'success', message: 'Transaction updated.' };
-  res.redirect('/transactions');
+    req.session.flash = withBudgetNotice('Transaction updated.', req.session.user.id, type, Number(category_id), date);
+    res.redirect('/transactions');
 });
 
 // delete 

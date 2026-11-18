@@ -1,6 +1,11 @@
 <%- include('../partials/app-start', { title: 'Budgets', active: 'budgets' }) %>
 <%
   const signed = (n) => (n < 0 ? '-' + money(Math.abs(n)) : money(n));
+  const statusInfo = {
+    ok: ['pill-soft', 'On track'],
+    warning: ['pill-warn', 'Almost at limit'],
+    exceeded: ['pill-over', 'Over budget'],
+  };
 %>
 <div class="d-flex align-items-center gap-2 mb-3">
   <a class="icon-btn" href="/budgets?month=<%= prevMonth %>" title="Previous month">
@@ -30,12 +35,15 @@
           <li class="list-row">
             <div class="flex-grow-1 min-w-0">
               <div class="d-flex justify-content-between gap-2">
-                <span class="fw-medium text-truncate"><%= b.name %></span>
+                  <span class="d-flex align-items-center gap-2 min-w-0">
+                  <span class="fw-medium text-truncate"><%= b.name %></span>
+                  <span class="pill <%= statusInfo[b.status][0] %>"><%= statusInfo[b.status][1] %></span>
+                  </span>
                 <span class="small text-muted-2 text-nowrap"><%= money(b.spent) %> of <%= money(b.amount_limit) %></span>
               </div>
               <div class="progress mt-2" role="progressbar" aria-label="<%= b.name %> budget used"
                    aria-valuenow="<%= b.percent %>" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar" style="width: <%= b.barWidth %>%"></div>
+              <div class="progress-bar <%= b.status === 'warning' ? 'warn' : '' %><%= b.status === 'exceeded' ? 'over' : '' %>" style="width: <%= b.barWidth %>%"></div>
               </div>
               <div class="small text-muted-2 mt-1">
                 <%= b.percent %>% used &middot; <%= b.remaining >= 0 ? money(b.remaining) + ' left' : 'Over by ' + money(Math.abs(b.remaining)) %>

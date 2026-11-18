@@ -357,4 +357,19 @@ font-family:'Plus Jakarta Sans',system-ui,sans-serif;
 }
 }
 
-.min-w-0 { min-width:0; }
+.min-w-0 { 
+    min-width:0; 
+}
+
+/* budget status pills (the text says the status, so colour is never the only clue) */
+.pill-warn { 
+    background:#FDF0D5; 
+    color:#7A4B00; 
+    border:1px solid #F0A93B; 
+}
+
+.pill-over { 
+    background:#FBE1DD; 
+    color:#8A1F14; 
+    border:1px solid #E5584F; 
+}

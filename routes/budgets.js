@@ -3,11 +3,10 @@ const { body, validationResult } = require('express-validator');
 const db = require('../db');
 const { requireRole } = require('../middleware/auth');
 const { isMonth, currentMonth, shiftMonth, monthLabel } = require('../utils/months');
+const { loadMonth } = require('../utils/budgetData');
 
 const router = express.Router();
 router.use(requireRole('user')); // only normal users have budgets
-
-const round2 = (n) => Math.round(n * 100) / 100;
 
 // Validation for setting a budget
 const budgetRules = [
@@ -30,41 +29,6 @@ const budgetRules = [
     .matches(/^\d{1,9}(\.\d{1,2})?$/).withMessage('Enter an amount like 1500 or 1500.50.').bail()
     .custom((v) => Number(v) > 0).withMessage('The limit must be greater than 0.'),
 ];
-
-// Every category with its budget for the month (if any) and what was spent on it that month
-function loadMonth(userId, month) {
-  const rows = db
-    .prepare(
-      `SELECT c.id AS category_id, c.name, b.id AS budget_id, b.amount_limit,
-              COALESCE((SELECT SUM(t.amount) FROM transactions t
-                         WHERE t.category_id = c.id AND t.user_id = c.user_id
-                           AND t.type = 'expense' AND substr(t.date, 1, 7) = ?), 0) AS spent
-         FROM categories c
-         LEFT JOIN budgets b ON b.category_id = c.id AND b.user_id = c.user_id AND b.month = ?
-        WHERE c.user_id = ?
-        ORDER BY c.name`
-    )
-    .all(month, month, userId);
-
-  const budgeted = rows
-    .filter((r) => r.budget_id !== null)
-    .map((r) => {
-      const spent = round2(r.spent);
-      const ratio = spent / r.amount_limit;
-      return {
-        ...r,
-        spent,
-        remaining: round2(r.amount_limit - spent),
-        percent: Math.floor(ratio * 100),
-        barWidth: Math.min(100, ratio * 100),
-      };
-    });
-  const unbudgeted = rows.filter((r) => r.budget_id === null);
-
-  const limit = round2(budgeted.reduce((sum, b) => sum + b.amount_limit, 0));
-  const spent = round2(budgeted.reduce((sum, b) => sum + b.spent, 0));
-  return { budgeted, unbudgeted, categories: rows, totals: { limit, spent, remaining: round2(limit - spent) } };
-}
 
 function renderPage(res, req, status, month, errors = {}, values = {}, editing = false) {
   const data = loadMonth(req.session.user.id, month);
