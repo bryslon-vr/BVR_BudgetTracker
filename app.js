@@ -6,10 +6,13 @@ const db = require('./db');
 const { currentMonth, monthLabel } = require('./utils/months');
 const { loadMonth } = require('./utils/budgetData');
 const { budgetAlerts } = require('./utils/budgetStatus');
+const { monthTotals, spendingByCategory } = require('./utils/dashboardData');
 const { requireRole } = require('./middleware/auth');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
+
+app.locals.moneyShort = (n) => 'R ' + Math.round(Number(n)).toLocaleString('en-US');
 
 // Helpers available in every view
 app.locals.money = (n) =>
@@ -68,12 +71,17 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
   const userId = req.session.user.id;
   const categories = db.prepare('SELECT id, name FROM categories WHERE user_id = ? ORDER BY name').all(userId);
   const month = currentMonth();
-  const { budgeted } = loadMonth(userId, month);
+  const { budgeted, totals: budgetTotals } = loadMonth(userId, month);
+  const spending = spendingByCategory(userId, month);
   res.render('dashboard', {
     categories,
     monthLabel: monthLabel(month),
     budgetCount: budgeted.length,
+    budgetTotals,
     alerts: budgetAlerts(budgeted),
+    monthTotals: monthTotals(userId, month),
+    spending,
+    chart: { labels: spending.slices.map((s) => s.name), values: spending.slices.map((s) => s.total) },
   });
 });
 

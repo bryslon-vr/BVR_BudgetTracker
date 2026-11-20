@@ -1,34 +1,61 @@
 <%- include('partials/app-start', { title: 'Dashboard', active: 'dashboard' }) %>
+<%
+  const signed = (n) => (n < 0 ? '-' + money(Math.abs(n)) : money(n));
+  const shortSigned = (n) => (n < 0 ? '-' + moneyShort(Math.abs(n)) : moneyShort(n));
+%>
 <div class="row g-3">
-  <div class="col-12 col-lg-7">
+  <div class="col-12 col-lg-8">
     <div class="glass p-4 mb-3">
-      <h2 class="h4 fw-bold">Welcome, <%= currentUser.name %></h2>
-      <p class="mb-0">The full dashboard with charts comes next.</p>
+      <div class="d-flex justify-content-between align-items-baseline mb-3">
+        <h2 class="h5 fw-bold mb-0">Budget this month</h2>
+        <span class="small text-muted-2"><%= monthLabel %></span>
+      </div>
+      <div class="bubbles">
+        <div class="bubble"><span class="small">Spent</span><strong><%= moneyShort(budgetTotals.spent) %></strong></div>
+        <div class="bubble bubble-main"><span class="small">Budget limit</span><strong><%= moneyShort(budgetTotals.limit) %></strong></div>
+        <div class="bubble"><span class="small">Remaining</span><strong><%= shortSigned(budgetTotals.remaining) %></strong></div>
+      </div>
+      <% if (budgetCount === 0) { %>
+        <p class="text-center small text-muted-2 mt-3 mb-0">Set a budget to see how much is left. <a href="/budgets">Open budgets</a></p>
+      <% } %>
     </div>
 
-    <div class="glass p-4">
-      <h2 class="h5 fw-bold mb-3">Budget alerts for <%= monthLabel %></h2>
-      <% if (budgetCount === 0) { %>
-        <p class="mb-0 text-muted-2">You have not set any budgets for this month. <a href="/budgets">Set a budget</a></p>
-      <% } else if (alerts.length === 0) { %>
-        <p class="mb-0">All your budgets are on track this month.</p>
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-sm-4"><div class="glass p-3 h-100"><div class="small text-muted-2">Income</div><div class="fw-bold amount amount-in">+<%= money(monthTotals.income) %></div></div></div>
+      <div class="col-12 col-sm-4"><div class="glass p-3 h-100"><div class="small text-muted-2">Expenses</div><div class="fw-bold amount">-<%= money(monthTotals.expense) %></div></div></div>
+      <div class="col-12 col-sm-4"><div class="glass p-3 h-100"><div class="small text-muted-2">Balance</div><div class="fw-bold amount"><%= signed(monthTotals.balance) %></div></div></div>
+    </div>
+
+    <div class="glass-blue chart-card p-4">
+      <h2 class="h5 fw-bold mb-3">Spending by category</h2>
+      <% if (spending.slices.length === 0) { %>
+        <p class="mb-0">No expenses recorded this month yet. <a href="/transactions/new">Add an expense</a></p>
       <% } else { %>
-        <% alerts.forEach((a) => { %>
-          <div class="alert alert-<%= a.status === 'exceeded' ? 'danger' : 'warning' %> rounded-4 mb-2" role="alert">
-            <% if (a.status === 'exceeded') { %>
-              <strong><%= a.name %></strong> is over budget (<%= a.percent %>% used, over by <%= money(Math.abs(a.remaining)) %>).
-            <% } else { %>
-              <strong><%= a.name %></strong> has used <%= a.percent %>% of its budget (<%= money(a.remaining) %> left).
-            <% } %>
+        <div class="row g-3 align-items-center">
+          <div class="col-12 col-md-5">
+            <div class="chart-wrap">
+              <canvas id="spendingChart" role="img" aria-label="Doughnut chart of this month's spending by category"></canvas>
+              <div class="chart-center"><span class="small">Spent</span><strong><%= money(spending.total) %></strong></div>
+            </div>
           </div>
-        <% }) %>
-        <a href="/budgets" class="btn btn-pill-soft mt-2">View budgets</a>
+          <div class="col-12 col-md-7">
+            <ul class="list-unstyled mb-0 chart-legend">
+              <% spending.slices.forEach((s, i) => { %>
+                <li class="d-flex align-items-center gap-2 py-1">
+                  <span class="swatch" data-swatch="<%= i %>"></span>
+                  <span class="flex-grow-1 text-truncate"><%= s.name %></span>
+                  <span class="text-nowrap"><%= money(s.total) %> &middot; <%= s.percent %>%</span>
+                </li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
       <% } %>
     </div>
   </div>
 
-  <div class="col-12 col-lg-5">
-    <div class="glass p-4">
+  <div class="col-12 col-lg-4">
+    <div class="glass p-4 mb-3">
       <h2 class="h5 fw-bold mb-3">Quick add</h2>
       <% if (categories.length === 0) { %>
         <p class="mb-3">Add a category first.</p>
@@ -56,6 +83,30 @@
         </form>
       <% } %>
     </div>
+
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3">Budget alerts</h2>
+      <% if (budgetCount === 0) { %>
+        <p class="mb-0 text-muted-2">You have not set any budgets for this month. <a href="/budgets">Set a budget</a></p>
+      <% } else if (alerts.length === 0) { %>
+        <p class="mb-0">All your budgets are on track this month.</p>
+      <% } else { %>
+        <% alerts.forEach((a) => { %>
+          <div class="alert alert-<%= a.status === 'exceeded' ? 'danger' : 'warning' %> rounded-4 mb-2" role="alert">
+            <% if (a.status === 'exceeded') { %>
+              <strong><%= a.name %></strong> is over budget (<%= a.percent %>% used, over by <%= money(Math.abs(a.remaining)) %>).
+            <% } else { %>
+              <strong><%= a.name %></strong> has used <%= a.percent %>% of its budget (<%= money(a.remaining) %> left).
+            <% } %>
+          </div>
+        <% }) %>
+        <a href="/budgets" class="btn btn-pill-soft mt-2">View budgets</a>
+      <% } %>
+    </div>
   </div>
 </div>
+
+<script id="chart-data" type="application/json"><%- JSON.stringify(chart).replace(/</g, '\\u003c') %></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="/js/dashboard.js"></script>
 <%- include('partials/app-end') %>

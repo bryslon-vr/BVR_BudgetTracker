@@ -107,7 +107,7 @@ describe('login and logout', () => {
 
     const dash = await agent.get('/dashboard');
     expect(dash.status).toBe(200);
-    expect(dash.text).toContain('Welcome, Test User');
+    expect(dash.text).toContain('Hello, Test');
 
     const logout = await agent.post('/logout');
     expect(logout.status).toBe(302);
