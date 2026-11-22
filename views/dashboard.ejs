@@ -2,6 +2,11 @@
 <%
   const signed = (n) => (n < 0 ? '-' + money(Math.abs(n)) : money(n));
   const shortSigned = (n) => (n < 0 ? '-' + moneyShort(Math.abs(n)) : moneyShort(n));
+  const statusInfo = {
+    ok: ['pill-soft', 'On track'],
+    warning: ['pill-warn', 'Almost at limit'],
+    exceeded: ['pill-over', 'Over budget'],
+  };
 %>
 <div class="row g-3">
   <div class="col-12 col-lg-8">
@@ -26,7 +31,28 @@
       <div class="col-12 col-sm-4"><div class="glass p-3 h-100"><div class="small text-muted-2">Balance</div><div class="fw-bold amount"><%= signed(monthTotals.balance) %></div></div></div>
     </div>
 
-    <div class="glass-blue chart-card p-4">
+    <div class="glass p-4 mb-3">
+      <h2 class="h5 fw-bold mb-1">Income vs expenses</h2>
+      <p class="small text-muted-2 mb-3">Last 6 months</p>
+      <div class="trend-wrap">
+        <canvas id="trendChart" role="img" aria-label="Bar chart of income and expenses for the last six months"></canvas>
+      </div>
+      <details class="mt-3">
+        <summary class="small">Show the numbers</summary>
+        <div class="table-responsive mt-2">
+          <table class="table table-sm mb-0 trend-table">
+            <thead><tr><th scope="col">Month</th><th scope="col" class="text-end">Income</th><th scope="col" class="text-end">Expenses</th></tr></thead>
+            <tbody>
+              <% trend.forEach((t) => { %>
+                <tr><th scope="row" class="fw-normal"><%= t.label %></th><td class="text-end"><%= money(t.income) %></td><td class="text-end"><%= money(t.expense) %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <div class="glass-blue chart-card p-4 mb-3">
       <h2 class="h5 fw-bold mb-3">Spending by category</h2>
       <% if (spending.slices.length === 0) { %>
         <p class="mb-0">No expenses recorded this month yet. <a href="/transactions/new">Add an expense</a></p>
@@ -51,6 +77,35 @@
           </div>
         </div>
       <% } %>
+    </div>
+
+    <div class="glass p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0">Category budgets</h2>
+        <a href="/budgets" class="small">View all budgets</a>
+      </div>
+      <% if (budgetList.length === 0) { %>
+        <p class="mb-0 text-muted-2">No budgets for this month yet.</p>
+      <% } %>
+      <ul class="list-unstyled mb-0">
+        <% budgetList.forEach((b) => { %>
+          <li class="list-row">
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex justify-content-between gap-2">
+                <span class="d-flex align-items-center gap-2 min-w-0">
+                  <span class="fw-medium text-truncate"><%= b.name %></span>
+                  <span class="pill <%= statusInfo[b.status][0] %>"><%= statusInfo[b.status][1] %></span>
+                </span>
+                <span class="small text-muted-2 text-nowrap"><%= money(b.spent) %> of <%= money(b.amount_limit) %></span>
+              </div>
+              <div class="progress mt-2" role="progressbar" aria-label="<%= b.name %> budget used"
+                   aria-valuenow="<%= b.percent %>" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar <%= b.status === 'warning' ? 'warn' : '' %><%= b.status === 'exceeded' ? 'over' : '' %>" style="width: <%= b.barWidth %>%"></div>
+              </div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
     </div>
   </div>
 
@@ -107,6 +162,7 @@
 </div>
 
 <script id="chart-data" type="application/json"><%- JSON.stringify(chart).replace(/</g, '\\u003c') %></script>
+<script id="trend-data" type="application/json"><%- JSON.stringify(trendChart).replace(/</g, '\\u003c') %></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="/js/dashboard.js"></script>
 <%- include('partials/app-end') %>

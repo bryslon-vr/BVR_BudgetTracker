@@ -445,3 +445,19 @@ font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     border:1px solid rgba(20,24,58,.45); 
     flex:none; 
 }
+
+/* dashboard: income vs expenses chart */
+.trend-wrap { 
+    position:relative; 
+    height:240px; 
+}
+
+.trend-table { 
+    --bs-table-bg:transparent; 
+    --bs-table-color:var(--text); 
+}
+
+details summary { 
+    cursor:pointer; 
+    color:var(--muted); 
+}

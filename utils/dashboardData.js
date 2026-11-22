@@ -1,5 +1,5 @@
 const db = require('../db');
-
+const { lastMonths, shortMonth } = require('./months');
 const round2 = (n) => Math.round(n * 100) / 100;
 
 // Income, expenses and balance for one month (all categories, whether or not they have a budget)
@@ -45,4 +45,28 @@ function spendingByCategory(userId, month, max = 6) {
   return { slices, total };
 }
 
-module.exports = { monthTotals, groupTop, spendingByCategory };
+// Income and expenses for each of the last `count` months ending at endMonth, oldest first.
+// Months with no transactions are included with 0, so the chart always has the same number of bars.
+function incomeVsExpenses(userId, endMonth, count = 6) {
+  const months = lastMonths(endMonth, count);
+  const rows = db
+    .prepare(
+      `SELECT substr(date, 1, 7) AS month,
+              COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS income,
+              COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS expense
+         FROM transactions
+        WHERE user_id = ? AND substr(date, 1, 7) BETWEEN ? AND ?
+        GROUP BY substr(date, 1, 7)`
+    )
+    .all(userId, months[0], months[months.length - 1]);
+  const byMonth = Object.fromEntries(rows.map((r) => [r.month, r]));
+
+  return months.map((m) => ({
+    month: m,
+    label: shortMonth(m),
+    income: round2(byMonth[m] ? byMonth[m].income : 0),
+    expense: round2(byMonth[m] ? byMonth[m].expense : 0),
+  }));
+}
+
+module.exports = { monthTotals, groupTop, spendingByCategory, incomeVsExpenses };

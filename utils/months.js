@@ -22,4 +22,17 @@ function monthLabel(month) {
   return new Date(y, m - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 }
 
-module.exports = { isMonth, currentMonth, shiftMonth, monthLabel };
+// lastMonths('2026-11', 3) gives ['2026-09', '2026-10', '2026-11'] (oldest first)
+function lastMonths(endMonth, count) {
+  const months = [];
+  for (let i = count - 1; i >= 0; i--) months.push(shiftMonth(endMonth, -i));
+  return months;
+}
+
+// shortMonth('2026-11') gives 'Nov'
+function shortMonth(month) {
+  const [y, m] = month.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'short' });
+}
+
+module.exports = { isMonth, currentMonth, shiftMonth, monthLabel, lastMonths, shortMonth };

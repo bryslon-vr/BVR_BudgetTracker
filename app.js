@@ -6,7 +6,7 @@ const db = require('./db');
 const { currentMonth, monthLabel } = require('./utils/months');
 const { loadMonth } = require('./utils/budgetData');
 const { budgetAlerts } = require('./utils/budgetStatus');
-const { monthTotals, spendingByCategory } = require('./utils/dashboardData');
+const { monthTotals, spendingByCategory, incomeVsExpenses } = require('./utils/dashboardData');
 const { requireRole } = require('./middleware/auth');
 
 const app = express();
@@ -73,6 +73,9 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
   const month = currentMonth();
   const { budgeted, totals: budgetTotals } = loadMonth(userId, month);
   const spending = spendingByCategory(userId, month);
+  const trend = incomeVsExpenses(userId, month, 6);
+  // Budgets shown on the dashboard: the ones closest to (or over) their limit first
+  const budgetList = [...budgeted].sort((a, b) => b.percent - a.percent || a.name.localeCompare(b.name)).slice(0, 6);
   res.render('dashboard', {
     categories,
     monthLabel: monthLabel(month),
@@ -82,6 +85,9 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
     monthTotals: monthTotals(userId, month),
     spending,
     chart: { labels: spending.slices.map((s) => s.name), values: spending.slices.map((s) => s.total) },
+    trend,
+    trendChart: { labels: trend.map((t) => t.label), income: trend.map((t) => t.income), expense: trend.map((t) => t.expense) },
+    budgetList,
   });
 });
 
