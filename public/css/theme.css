@@ -461,3 +461,9 @@ details summary {
     cursor:pointer; 
     color:var(--muted); 
 }
+
+/* admin statistics */
+.stat-value { 
+    font-size:1.6rem; 
+    font-weight:700; 
+}

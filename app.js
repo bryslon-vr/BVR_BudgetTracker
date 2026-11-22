@@ -7,6 +7,7 @@ const { currentMonth, monthLabel } = require('./utils/months');
 const { loadMonth } = require('./utils/budgetData');
 const { budgetAlerts } = require('./utils/budgetStatus');
 const { monthTotals, spendingByCategory, incomeVsExpenses } = require('./utils/dashboardData');
+const { adminStats, MIN_USERS_FOR_CATEGORY } = require('./utils/adminStats');
 const { requireRole } = require('./middleware/auth');
 
 const app = express();
@@ -94,7 +95,9 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
 app.use('/categories', require('./routes/categories'));
 app.use('/transactions', require('./routes/transactions'));
 app.use('/budgets', require('./routes/budgets'));
-app.get('/admin', requireRole('admin'), (req, res) => res.render('admin/stats'));
+app.get('/admin', requireRole('admin'), (req, res) => {
+  res.render('admin/stats', { stats: adminStats(currentMonth()), minUsers: MIN_USERS_FOR_CATEGORY });
+});
 
 // errors
 app.use((req, res) => res.status(404).render('errors/404'));

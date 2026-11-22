@@ -1,6 +1,69 @@
 <%- include('../partials/app-start', { title: 'Statistics', active: 'admin' }) %>
-<div class="glass p-4 p-md-5">
-  <h2 class="h4 fw-bold">Admin overview</h2>
-  <p class="mb-0">The usage statistics page is built in Week 3. Admins only see totals and counts, never individual transactions.</p>
+<%
+  const topCategories = stats.topCategories;
+  const mostUses = topCategories.length ? topCategories[0].uses : 0;
+%>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="glass p-3 h-100"><div class="small text-muted-2">Total users</div><div class="stat-value"><%= stats.totalUsers %></div></div></div>
+  <div class="col-6 col-lg-3"><div class="glass p-3 h-100"><div class="small text-muted-2">New users this month</div><div class="stat-value"><%= stats.newUsers %></div></div></div>
+  <div class="col-6 col-lg-3"><div class="glass p-3 h-100"><div class="small text-muted-2">Active users this month</div><div class="stat-value"><%= stats.activeUsers %></div></div></div>
+  <div class="col-6 col-lg-3"><div class="glass p-3 h-100"><div class="small text-muted-2">Total transactions</div><div class="stat-value"><%= stats.totalTransactions %></div></div></div>
 </div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="glass p-4 h-100">
+      <h2 class="h5 fw-bold mb-1">Transactions per month</h2>
+      <p class="small text-muted-2 mb-3">All users combined, last 6 months</p>
+      <div class="trend-wrap">
+        <canvas id="adminChart" role="img" aria-label="Bar chart of the number of transactions per month for the last six months"></canvas>
+      </div>
+      <details class="mt-3">
+        <summary class="small">Show the numbers</summary>
+        <div class="table-responsive mt-2">
+          <table class="table table-sm mb-0 trend-table">
+            <thead><tr><th scope="col">Month</th><th scope="col" class="text-end">Transactions</th></tr></thead>
+            <tbody>
+              <% stats.perMonth.forEach((m) => { %>
+                <tr><th scope="row" class="fw-normal"><%= m.label %></th><td class="text-end"><%= m.count %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="glass p-4 h-100">
+      <h2 class="h5 fw-bold mb-1">Most used categories</h2>
+      <p class="small text-muted-2 mb-3">Only names used by at least <%= minUsers %> users are shown</p>
+      <% if (topCategories.length === 0) { %>
+        <p class="mb-0 text-muted-2">No category is used by at least <%= minUsers %> users yet.</p>
+      <% } %>
+      <ul class="list-unstyled mb-0">
+        <% topCategories.forEach((c) => { %>
+          <li class="py-2">
+            <div class="d-flex justify-content-between gap-2">
+              <span class="fw-medium text-truncate"><%= c.name %></span>
+              <span class="small text-muted-2 text-nowrap"><%= c.uses %> transactions &middot; <%= c.users %> users</span>
+            </div>
+            <div class="progress mt-2" role="progressbar" aria-label="<%= c.name %> share of the most used category"
+                 aria-valuenow="<%= c.uses %>" aria-valuemin="0" aria-valuemax="<%= mostUses %>">
+              <div class="progress-bar" style="width: <%= Math.round((c.uses * 100) / mostUses) %>%"></div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="glass p-4 mt-3">
+  <p class="mb-0 small">Only usage statistics are shown here: totals and counts. Individual transactions, amounts and notes are never visible to the admin.</p>
+</div>
+
+<script id="admin-data" type="application/json"><%- JSON.stringify({ labels: stats.perMonth.map((m) => m.label), counts: stats.perMonth.map((m) => m.count) }).replace(/</g, '\\u003c') %></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="/js/admin.js"></script>
 <%- include('../partials/app-end') %>
