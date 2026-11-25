@@ -102,8 +102,10 @@ app.get('/admin', requireRole('admin'), (req, res) => {
 // errors
 app.use((req, res) => res.status(404).render('errors/404'));
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).render('errors/500');
+  // Mistakes in the request itself (such as a badly encoded address) get a 400 page, anything else a 500
+  const status = err.status >= 400 && err.status < 500 ? err.status : 500;
+  if (status === 500) console.error(err);
+  res.status(status).render(status === 500 ? 'errors/500' : 'errors/400');
 });
 
 if (require.main === module) {

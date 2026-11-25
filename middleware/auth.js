@@ -3,15 +3,6 @@ function homePathFor(user) {
   return user.role === 'admin' ? '/admin' : '/dashboard';
 }
 
-// Only logged-in users may continue
-function requireLogin(req, res, next) {
-  if (!req.session.user) {
-    req.session.flash = { type: 'warning', message: 'Please log in to continue.' };
-    return res.redirect('/login');
-  }
-  next();
-}
-
 // Only logged-in users with the given role may continue: requireRole('admin')
 function requireRole(role) {
   return (req, res, next) => {
@@ -32,4 +23,4 @@ function redirectIfLoggedIn(req, res, next) {
   next();
 }
 
-module.exports = { homePathFor, requireLogin, requireRole, redirectIfLoggedIn };
+module.exports = { homePathFor, requireRole, redirectIfLoggedIn };
