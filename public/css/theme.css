@@ -467,3 +467,12 @@ details summary {
     font-size:1.6rem; 
     font-weight:700; 
 }
+
+/* small screens: let the text in the budget circles shrink a little so amounts stay inside */
+.bubble strong { 
+    font-size:clamp(.72rem, 3.4vw, .95rem); 
+}
+
+.bubble-main strong { 
+    font-size:clamp(.85rem, 4.2vw, 1.15rem); 
+}
