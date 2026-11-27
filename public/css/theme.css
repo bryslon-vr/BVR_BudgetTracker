@@ -476,3 +476,17 @@ details summary {
 .bubble-main strong { 
     font-size:clamp(.85rem, 4.2vw, 1.15rem); 
 }
+
+/* CSV import */
+.pill-blue-dark { 
+    background:#3F5FD9; 
+    color:#fff; 
+}
+
+.csv-example { 
+    background:rgba(255,255,255,.6); 
+    border-radius:12px; 
+    padding:.75rem; 
+    overflow-x:auto; 
+    color:var(--text); 
+}

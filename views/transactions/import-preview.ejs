@@ -1,0 +1,57 @@
+<%- include('../partials/app-start', { title: 'Preview import', active: 'transactions' }) %>
+<div class="glass p-4 mb-3">
+  <h2 class="h5 fw-bold mb-2">Preview: <%= fileName %></h2>
+  <div class="d-flex flex-wrap gap-2">
+    <span class="pill pill-blue-dark"><%= newCount %> will be imported</span>
+    <span class="pill pill-soft"><%= duplicateCount %> already exist and will be skipped</span>
+    <span class="pill <%= problems.length ? 'pill-over' : 'pill-soft' %>"><%= problems.length %> <%= problems.length === 1 ? 'row has a problem' : 'rows have problems' %></span>
+  </div>
+</div>
+
+<% if (problems.length > 0) { %>
+  <div class="glass p-4 mb-3">
+    <h2 class="h6 fw-bold mb-3">Rows that will not be imported</h2>
+    <ul class="mb-0 ps-3 small">
+      <% problems.slice(0, 50).forEach((p) => { %>
+        <li>Line <%= p.line %>: <%= p.message %></li>
+      <% }) %>
+    </ul>
+    <% if (problems.length > 50) { %><p class="small text-muted-2 mt-2 mb-0">Showing the first 50 problems.</p><% } %>
+  </div>
+<% } %>
+
+<% if (previewRows.length > 0) { %>
+  <div class="glass p-4 mb-3">
+    <h2 class="h6 fw-bold mb-3">Rows in the file</h2>
+    <ul class="list-unstyled mb-0">
+      <% previewRows.forEach((r) => { %>
+        <li class="list-row">
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-medium text-truncate"><%= r.note || r.categoryName %></div>
+            <div class="small text-muted-2 d-flex flex-wrap gap-2 align-items-center">
+              <span><%= fmtDate(r.date) %></span>
+              <span class="pill pill-soft"><%= r.categoryName %><%= r.usedDefault ? ' (default)' : '' %></span>
+              <% if (r.duplicate) { %><span class="pill pill-warn">Already exists</span><% } %>
+            </div>
+          </div>
+          <strong class="amount <%= r.type === 'income' ? 'amount-in' : '' %>"><%= r.type === 'income' ? '+' : '-' %><%= money(r.amount) %></strong>
+        </li>
+      <% }) %>
+    </ul>
+    <% if (totalRows > previewRows.length) { %>
+      <p class="small text-muted-2 mt-3 mb-0">Showing the first <%= previewRows.length %> of <%= totalRows %> valid rows.</p>
+    <% } %>
+  </div>
+<% } %>
+
+<div class="d-flex flex-wrap gap-2">
+  <% if (newCount > 0) { %>
+    <form method="POST" action="/transactions/import/confirm">
+      <button type="submit" class="btn btn-pill">Import <%= newCount %> transaction<%= newCount === 1 ? '' : 's' %></button>
+    </form>
+  <% } else { %>
+    <p class="mb-0 align-self-center">There is nothing new to import.</p>
+  <% } %>
+  <a href="/transactions/import" class="btn btn-pill-soft">Choose another file</a>
+</div>
+<%- include('../partials/app-end') %>

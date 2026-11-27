@@ -1,0 +1,50 @@
+<%- include('../partials/app-start', { title: 'Import transactions', active: 'transactions' }) %>
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3">Upload a bank statement</h2>
+      <% if (error) { %><div class="alert alert-danger rounded-4" role="alert"><%= error %></div><% } %>
+      <% if (categories.length === 0) { %>
+        <p class="mb-3">You need a category before you can import transactions.</p>
+        <a href="/categories" class="btn btn-pill">Add a category</a>
+      <% } else { %>
+        <form method="POST" action="/transactions/import" enctype="multipart/form-data" novalidate>
+          <div class="mb-3">
+            <label for="file" class="form-label">CSV file (up to 1 MB and <%= maxRows %> rows)</label>
+            <input type="file" id="file" name="file" accept=".csv,text/csv" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Category for rows that do not name one</label>
+            <select id="category_id" name="category_id" class="form-select form-control">
+              <% categories.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
+            </select>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-pill">Preview</button>
+            <a href="/transactions" class="btn btn-pill-soft">Cancel</a>
+          </div>
+        </form>
+        <p class="small text-muted-2 mt-3 mb-0">You will see a preview first. Nothing is saved until you confirm.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="glass p-4">
+      <h2 class="h5 fw-bold mb-3">How the file should look</h2>
+      <ul class="small mb-3 ps-3">
+        <li>The first row is a header with at least <strong>date</strong> and <strong>amount</strong>.</li>
+        <li>Optional columns: <strong>description</strong> (or note), <strong>category</strong> and <strong>type</strong>.</li>
+        <li>Dates look like 2026-11-05 or 05/11/2026 (day first).</li>
+        <li>A negative amount is an expense and a positive amount is income. Use a dot for cents (-125.50) and no thousands separators.</li>
+        <li>A category that matches one of yours is used. Any other row gets the category you chose.</li>
+        <li>Rows you already have (same date, type, amount and note) are skipped.</li>
+      </ul>
+      <pre class="small mb-3 csv-example">date,description,amount,category
+2026-11-02,Rent,-6500.00,Rent
+2026-11-05,Woolworths,-845.50,Groceries</pre>
+      <a href="/example-statement.csv" download class="btn btn-pill-soft">Download an example file</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/app-end') %>

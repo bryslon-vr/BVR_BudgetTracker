@@ -93,6 +93,7 @@ app.get('/dashboard', requireRole('user'), (req, res) => {
 });
 
 app.use('/categories', require('./routes/categories'));
+app.use('/transactions/import', require('./routes/import')); // before /transactions so "import" is not read as an id
 app.use('/transactions', require('./routes/transactions'));
 app.use('/budgets', require('./routes/budgets'));
 app.get('/admin', requireRole('admin'), (req, res) => {
